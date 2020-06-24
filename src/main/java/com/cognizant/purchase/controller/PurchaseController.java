@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.cache.annotation.*;
 
 import com.cognizant.purchase.domain.PurchaseOrder;
 import com.cognizant.purchase.domain.Stock;
@@ -56,7 +57,7 @@ public class PurchaseController {
 	
 	private static final String HOST = "localhost";
 	private static final String SCHEME = "http";
-	private int stockPort=8081;
+	private int stockPort=8086;
 	private String stockName;
 	private long stockId;
 	private int stockCount;	
@@ -137,6 +138,7 @@ public class PurchaseController {
         @ApiResponse(code = 404, message = "The resource you were trying to reach is not found")
     })	
 	@GetMapping("/getPurchase/v1")
+	@Cacheable(value = "purchase")
     public List<PurchaseOrder> getAllPurchase() {
 		
 		logger.debug("PurchaseController::getAllPurchase::entry()");
@@ -155,6 +157,7 @@ public class PurchaseController {
 	        @ApiResponse(code = 404, message = "The resource you were trying to reach is not found")
 	    })
 	@GetMapping("/getPurchase/v2/{id}")
+	@Cacheable(value = "purchase", key = "#purchaseId")
     public ResponseEntity<PurchaseOrder> getPurchaseById(@PathVariable(value = "id") Long purchaseId)
         throws ResourceNotFoundException {
 		
@@ -176,6 +179,7 @@ public class PurchaseController {
 	        @ApiResponse(code = 404, message = "The resource you were trying to reach is not found")
 	    })
 	@PutMapping("/updatePurchase/v1/{id}")
+	@CachePut(value = "purchase", key = "#purchaseId")
     public ResponseEntity<PurchaseOrder> updatePurchase(@PathVariable(value = "id") Long purchaseId,
          @RequestBody PurchaseOrder purchaseDetails) throws ResourceNotFoundException {
 		
@@ -206,6 +210,7 @@ public class PurchaseController {
 	        @ApiResponse(code = 404, message = "The resource you were trying to reach is not found")
 	    })
 	@DeleteMapping("/deletePurchase/v1/{id}")
+	@CacheEvict(value = "purchases", allEntries=true)
     public Map<String, Boolean> deletePurchase(@PathVariable(value = "id") Long purchaseId)
          throws ResourceNotFoundException {
 		

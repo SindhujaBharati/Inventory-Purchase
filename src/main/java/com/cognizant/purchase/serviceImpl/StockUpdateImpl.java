@@ -14,7 +14,7 @@ import com.cognizant.purchase.service.StockUpdate;
 public class StockUpdateImpl implements StockUpdate{
 	private static final String HOST = "localhost";
 	private static final String SCHEME = "http";
-	private int stockPort=8081;
+	private int stockPort=8086;
 	
 	@Autowired
 	private Stock stock;
