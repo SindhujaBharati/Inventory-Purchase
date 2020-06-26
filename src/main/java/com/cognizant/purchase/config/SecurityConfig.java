@@ -8,19 +8,18 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 
 @Configuration
 @EnableWebSecurity
-public class SecurityConfig extends WebSecurityConfigurerAdapter{
+public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	@Override
 	public void configure(AuthenticationManagerBuilder auth) throws Exception {
-		
+
 		auth.inMemoryAuthentication().withUser("admin").password("{noop}admin").authorities("ADMIN");
 
 	}
-	
+
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
 
-		 http.httpBasic().and().authorizeRequests()
-			.antMatchers("/cognizant/purchase/**").hasAuthority("ADMIN")
-			 .and().csrf().disable();
+		http.httpBasic().and().authorizeRequests().antMatchers("/cognizant/purchase/**").hasAuthority("ADMIN").and()
+				.csrf().disable();
 	}
 }

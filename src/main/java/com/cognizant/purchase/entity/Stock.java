@@ -1,4 +1,4 @@
-package com.cognizant.purchase.domain;
+package com.cognizant.purchase.entity;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;

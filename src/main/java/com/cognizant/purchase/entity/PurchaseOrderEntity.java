@@ -1,4 +1,4 @@
-package com.cognizant.purchase.domain;
+package com.cognizant.purchase.entity;
 
 import io.swagger.annotations.ApiModel;
 
@@ -15,12 +15,12 @@ import org.springframework.stereotype.Component;
 @Entity
 @Table(name = "Purchase")
 @ApiModel(description = "All details about the Purchase. ")
-public class PurchaseOrder {
+public class PurchaseOrderEntity {
 	
-	public PurchaseOrder() {
+	public PurchaseOrderEntity() {
 
 	}
-	public PurchaseOrder(long purchaseId, String purchaseName,
+	public PurchaseOrderEntity(long purchaseId, String purchaseName,
 			String purchaseType, int purchaseCount,
 			float purchaseAmtperCount, float purchaseAmtTotal) {
 		super();

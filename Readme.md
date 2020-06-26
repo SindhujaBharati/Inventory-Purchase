@@ -1,8 +1,8 @@
 #Purchase Management System
 
 Here the enterprise is Inventory Management System which has below three sub systems:
-1)Purchase Managment System
-2)Stock Managment System
+1)Purchase Management System
+2)Stock Management System
 3)Sales Management System
 
 #Adding a purchase details take care of two things
