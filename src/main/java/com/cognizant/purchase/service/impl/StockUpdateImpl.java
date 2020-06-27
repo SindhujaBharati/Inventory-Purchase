@@ -13,9 +13,9 @@ import com.cognizant.purchase.service.StockUpdate;
 
 @Service
 public class StockUpdateImpl implements StockUpdate {
-	private static final String HOST = "localhost";
+	private static final String HOST = "stockmanangement-env.eba-bxgxm6dm.us-east-1.elasticbeanstalk.com";
 	private static final String SCHEME = "http";
-	private int stockPort = 8088;
+	private int stockPort = 5000;
 	@Autowired
 	private RestTemplate restTemplate;
 
@@ -28,7 +28,7 @@ public class StockUpdateImpl implements StockUpdate {
 	}
 
 	@Override
-	public void updateStock(StockRequestDto stockRequest, int stockCount, long stockId) {
+	public void updateStock(StockRequestDto stockRequest, long stockId) {
 
 		String url = SCHEME + "://" + HOST + ":" + stockPort + "/" + "cognizant/stock/updateStock/v2/" + stockId;
 

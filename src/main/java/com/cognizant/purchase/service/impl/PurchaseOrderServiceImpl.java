@@ -5,6 +5,8 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jms.JmsException;
+import org.springframework.jms.core.JmsTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -16,14 +18,16 @@ import com.cognizant.purchase.exception.ResourceNotFoundException;
 import com.cognizant.purchase.repository.PurchaseRepository;
 import com.cognizant.purchase.service.PurchaseOrderService;
 import com.cognizant.purchase.service.StockUpdate;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Service
 public class PurchaseOrderServiceImpl implements PurchaseOrderService {
 	private static final Logger logger = LoggerFactory.getLogger(PurchaseOrderServiceImpl.class);
 
-	private static final String HOST = "localhost";
+	private static final String HOST = "stockmanangement-env.eba-bxgxm6dm.us-east-1.elasticbeanstalk.com";
 	private static final String SCHEME = "http";
-	private static final int STOCK_PORT = 8088;
+	private static final int STOCK_PORT = 5000;
 
 	@Autowired
 	private RestTemplate restTemplate;
@@ -31,6 +35,10 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
 	private StockUpdate stockUpdate;
 	@Autowired
 	private PurchaseRepository purchaseRepository;
+	@Autowired
+	private JmsTemplate jmsTemplate;
+	@Autowired
+	private ObjectMapper objectMapper;
 
 	@Override
 	public PurchaseOrderEntity createOrder(PurchaseOrderDto purchaseOrderDto) {
@@ -38,20 +46,37 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
 		logger.debug("PurchaseController::createOrder::entry()");
 		
 		String stockName = purchaseOrderDto.getPurchaseName();
+		String stockType = purchaseOrderDto.getPurchaseType();
 
 		String url = SCHEME + "://" + HOST + ":" + STOCK_PORT + "/" + "cognizant/stock/getstock/v3/" + stockName;
 		Stock stockResult = restTemplate.getForObject(url, Stock.class);
-		StockRequestDto stockRequest = new StockRequestDto();
 
-		stockRequest.setStockName(purchaseOrderDto.getPurchaseName());
-		stockRequest.setStockType(purchaseOrderDto.getPurchaseType());
-		stockRequest.setStockCount(purchaseOrderDto.getPurchaseCount());
 		if (stockResult == null) {
+			StockRequestDto stockRequest = new StockRequestDto();
+
+			stockRequest.setStockName(purchaseOrderDto.getPurchaseName());
+			stockRequest.setStockType(purchaseOrderDto.getPurchaseType());
+			stockRequest.setStockCount(purchaseOrderDto.getPurchaseCount());
 			stockUpdate.addStock(stockRequest);
-		} else {
-			int stockCount = stockResult.getStockCount();
-			long stockId = stockResult.getStockId();
-			stockUpdate.updateStock(stockRequest, stockCount, stockId);
+		} else if(stockResult.getStockName().equals(stockName) && stockResult.getStockType().equals(stockType)){
+			StockRequestDto stockRequest = new StockRequestDto();
+
+			stockRequest.setStockName(purchaseOrderDto.getPurchaseName());
+			stockRequest.setStockType(purchaseOrderDto.getPurchaseType());
+			stockRequest.setStockCount(stockResult.getStockCount()+purchaseOrderDto.getPurchaseCount());
+			//int stockCount = stockResult.getStockCount()+purchaseOrderDto.getPurchaseCount();
+			//long stockId = stockResult.getStockId();
+			//stockUpdate.updateStock(stockRequest, stockId);
+			//int stockCount = stockResult.getStockCount()+purchaseOrderDto.getPurchaseCount();
+			//long stockId = stockResult.getStockId();
+			//stockUpdate.updateStock(stockRequest, stockId);
+			
+			//sending to SQS
+			try {
+				jmsTemplate.convertAndSend(objectMapper.writeValueAsString(stockRequest));
+			} catch (JmsException | JsonProcessingException e) {
+				throw new RuntimeException(e);
+			}
 		}
 
 		logger.debug("PurchaseController::createOrder::exit()");

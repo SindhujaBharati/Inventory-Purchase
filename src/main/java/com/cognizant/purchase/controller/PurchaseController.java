@@ -1,6 +1,7 @@
 package com.cognizant.purchase.controller;
 
 import java.util.HashMap;
+
 import java.util.List;
 import java.util.Map;
 
@@ -30,14 +31,26 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 
+import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
+import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
+import org.springframework.stereotype.Component;
+import java.util.function.Function;
 @RestController
 @RequestMapping("/cognizant/purchase")
 @Api(value = "Purchase Management", description = "Operations pertaining to Purchase in Inventory Management System")
-public class PurchaseController {
+public class PurchaseController  implements Function<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
 	private static final Logger logger = LoggerFactory.getLogger(PurchaseController.class);
 	@Autowired
 	private PurchaseOrderService puchaseOrderService;
 
+	@Override
+	public APIGatewayProxyResponseEvent apply(APIGatewayProxyRequestEvent t) {
+		 	APIGatewayProxyResponseEvent responseEvent = new APIGatewayProxyResponseEvent();
+	        responseEvent.setStatusCode(200);
+	        responseEvent.setBody("Hello! Reached the Purchase Innventory Management:");
+	        return responseEvent;
+		
+	}
 	@ApiOperation(value = "Add a purchase", response = PurchaseOrderEntity.class)
 	@ApiResponses(value = { @ApiResponse(code = 200, message = "Successfully created Purchase Order"),
 			@ApiResponse(code = 401, message = "You are not authorized to view the resource"),
@@ -112,4 +125,6 @@ public class PurchaseController {
 		response.put("deleted", Boolean.TRUE);
 		return response;
 	}
+
+	
 }

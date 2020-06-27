@@ -6,6 +6,6 @@ public interface StockUpdate {
 
 	void addStock(StockRequestDto stock);
 
-	void updateStock(StockRequestDto stock, int stockCount, long stockId);
+	void updateStock(StockRequestDto stock, long stockId);
 
 }
